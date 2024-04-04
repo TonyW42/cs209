@@ -18,7 +18,7 @@ class baseline_classifier:
         tbar = tqdm(trainloader, dynamic_ncols=True)
         for data in tbar:
             logits = self.model(data)
-            loss = self.criteiron(logits, data["label"].to(self.args.device))
+            loss = self.criterion(logits, data["label"].to(self.args.device))
             loss.backward()
             self.optimizer.step()
             tbar.set_description("train_loss - {:.4f}".format(loss))
@@ -29,7 +29,7 @@ class baseline_classifier:
     def train(self, trainloader, devloader, testloader):
         test_accs, dev_accs = [], []
         for i in range(self.args.n_epochs):
-            dev_acc, test_acc = self._train_epoch(self, trainloader, devloader, testloader)
+            dev_acc, test_acc = self._train_epoch(trainloader, devloader, testloader)
             dev_accs.append(dev_acc)
             test_accs.append(test_acc)
             print("=" * 20)
@@ -59,7 +59,7 @@ def run_baseline_experiment(args):
     optimizer = torch.optim.Adam(model.parameters(), lr = args.lr)
     criterion = nn.CrossEntropyLoss()
     classifier = baseline_classifier(model, criterion, optimizer, args)
-    dev_accs , test_accs = classifier.train()
+    dev_accs , test_accs = classifier.train(trainloader, devloader, testloader)
     test_acc_chosen = test_accs[np.argmax(dev_accs)]
     return test_acc_chosen, dev_accs , test_accs
 
@@ -67,15 +67,16 @@ def run_baseline_experiment(args):
 
 def get_data(args):
     df = pd.read_csv("data/fake reviews dataset.csv")
-    train_df = df.iloc[:len(df) * args.train_size, :]
-    dev_df = df.iloc[len(df) * args.train_size : len(df) * (args.train_size + args.dev_size), :]
-    test_df = df.iloc[len(df) * (args.train_size + args.dev_size):, :]
+    label_2_id = {"CG":0, "OR": 1}
+    train_df = df.iloc[:int(len(df) * args.train_size), :]
+    dev_df = df.iloc[int(len(df) * args.train_size) : int(len(df) * (args.train_size + args.dev_size)), :]
+    test_df = df.iloc[int(len(df) * (args.train_size + args.dev_size)):, :]
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
     
-    traindataset = classification_dataset(train_df, tokenizer)
-    devdataset = classification_dataset(dev_df, tokenizer)
-    testdataset = classification_dataset(test_df, tokenizer)
+    traindataset = classification_dataset(train_df, tokenizer, label_2_id, args)
+    devdataset = classification_dataset(dev_df, tokenizer, label_2_id, args)
+    testdataset = classification_dataset(test_df, tokenizer, label_2_id, args)
 
     trainloader = DataLoader(traindataset, batch_size = args.bs, shuffle=True)
     devloader = DataLoader(devdataset, batch_size = args.bs, shuffle=True)

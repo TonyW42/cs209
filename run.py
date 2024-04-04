@@ -4,7 +4,7 @@ from classifier import *
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--emb_size", type=int, default=769)
+parser.add_argument("--emb_size", type=int, default=768)
 parser.add_argument("--bs", type=int, default=8)
 parser.add_argument("--lr", type=float, default=2e-5)
 parser.add_argument("--other_features", type= bool, default=False)
@@ -20,8 +20,8 @@ args = parser.parse_args()
 
 if torch.cuda.is_available():
     args.device = "cuda"
-elif torch.backends.mps.is_available():
-    args.device = "mps"
+# elif torch.backends.mps.is_available():
+#     args.device = "mps"
 
 if __name__ == "__main__":
     test_acc_chosen, dev_accs , test_accs = run_baseline_experiment(args)

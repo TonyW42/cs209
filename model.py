@@ -4,6 +4,7 @@ from torch.utils.data import Dataset
 
 class baseline_model(nn.Module):
     def __init__(self, lm, args):
+        super(baseline_model, self).__init__()
         self.lm = lm
         self.args = args
         feature_size =  args.emb_size
@@ -32,7 +33,7 @@ class classification_dataset(Dataset):
         return len(self.df)
     
     def __getitem__(self, idx):
-        tokenized = self.tokenizer(self.df["text_"][idx])
+        tokenized = self.tokenizer(self.df["text_"][idx], padding = "max_length")
         tokenized["label"] = self.label_2_id[self.df["label"][idx]]
         if self.args.other_features:
             pass ## TODO here 

@@ -33,7 +33,9 @@ class classification_dataset(Dataset):
         return len(self.df)
     
     def __getitem__(self, idx):
-        tokenized = self.tokenizer(self.df["text_"][idx], padding = "max_length")
+        tokenized = self.tokenizer(self.df["text_"][idx], 
+                                   padding = "max_length",
+                                   truncation = True )
         tokenized["label"] = self.label_2_id[self.df["label"][idx]]
         if self.args.other_features:
             pass ## TODO here 

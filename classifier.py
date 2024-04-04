@@ -17,6 +17,7 @@ class baseline_classifier:
     def _train_epoch(self, trainloader, devloader, testloader):
         tbar = tqdm(trainloader, dynamic_ncols=True)
         for data in tbar:
+            self.optimizer.zero_grad()
             logits = self.model(data)
             loss = self.criterion(logits, data["label"].to(self.args.device))
             loss.backward()
@@ -47,7 +48,7 @@ class baseline_classifier:
                 logits = self.model(data)
                 pred = torch.argmax(logits, dim=-1)
                 label = data["label"]
-                pred.extend(pred.detach().cpu().tolist())
+                preds.extend(pred.detach().cpu().tolist())
                 labels.extend(label.cpu().tolist())
             acc = np.sum(np.equal(preds, labels)) / len(preds)
             return acc 
@@ -56,6 +57,7 @@ def run_baseline_experiment(args):
     trainloader, devloader, testloader = get_data(args)
     lm = AutoModel.from_pretrained(args.model_name)
     model = baseline_model(lm, args)
+    model.to(args.device)
     optimizer = torch.optim.Adam(model.parameters(), lr = args.lr)
     criterion = nn.CrossEntropyLoss()
     classifier = baseline_classifier(model, criterion, optimizer, args)
@@ -68,9 +70,9 @@ def run_baseline_experiment(args):
 def get_data(args):
     df = pd.read_csv("data/fake reviews dataset.csv")
     label_2_id = {"CG":0, "OR": 1}
-    train_df = df.iloc[:int(len(df) * args.train_size), :]
-    dev_df = df.iloc[int(len(df) * args.train_size) : int(len(df) * (args.train_size + args.dev_size)), :]
-    test_df = df.iloc[int(len(df) * (args.train_size + args.dev_size)):, :]
+    train_df = df.iloc[:int(len(df) * args.train_size), :].reset_index(drop=True)
+    dev_df = df.iloc[int(len(df) * args.train_size) : int(len(df) * (args.train_size + args.dev_size)), :].reset_index(drop=True)
+    test_df = df.iloc[int(len(df) * (args.train_size + args.dev_size)):, :].reset_index(drop=True)
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
     

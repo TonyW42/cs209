@@ -71,7 +71,7 @@ def run_baseline_experiment(args):
 def get_data(args):
     df = pd.read_csv("data/fake reviews dataset.csv")
     label_2_id = {"CG":0, "OR": 1}
-    train_df, test_df = train_test_split(df, test_size=0.8, random_state=109)
+    train_df, test_df = train_test_split(df, test_size=0.2, random_state=109)
     train_df, dev_df = train_test_split(train_df, test_size=0.125, random_state=109)
 
     train_df = train_df.reset_index(drop=True)

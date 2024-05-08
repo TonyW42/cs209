@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd 
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer, AutoModel
+from sklearn.model_selection import train_test_split
 
 from model import *
 
@@ -70,10 +71,12 @@ def run_baseline_experiment(args):
 def get_data(args):
     df = pd.read_csv("data/fake reviews dataset.csv")
     label_2_id = {"CG":0, "OR": 1}
-    train_df = df.iloc[:int(len(df) * args.train_size), :].reset_index(drop=True)
-    dev_df = df.iloc[int(len(df) * args.train_size) : int(len(df) * (args.train_size + args.dev_size)), :].reset_index(drop=True)
-    test_df = df.iloc[int(len(df) * (args.train_size + args.dev_size)):, :].reset_index(drop=True)
+    train_df, test_df = train_test_split(df, test_size=0.8, random_state=109)
+    train_df, dev_df = train_test_split(train_df, test_size=0.125, random_state=109)
 
+    train_df = train_df.reset_index(drop=True)
+    dev_df = dev_df.reset_index(drop=True)
+    test_df = test_df.reset_index(drop=True)
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
     
     traindataset = classification_dataset(train_df, tokenizer, label_2_id, args)

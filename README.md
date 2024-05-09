@@ -1,6 +1,8 @@
 # cs209
 The course project page for CS209 project.  
 
+Please see our video presentation at: https://drive.google.com/file/d/1F0B8ZB-zsXZskry-R3YBLzO7WfMavhdx/view?usp=sharing
+
 Some explanation to the flags:
 - `--model_name`: used to identify a model on Huggingface.
 - `--other_feature`: raise this flag (no need to add anything after) to indicate that we are using other structured features 

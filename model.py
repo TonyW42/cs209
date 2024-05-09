@@ -18,7 +18,7 @@ class baseline_model(nn.Module):
         )
         emb = encoded["pooler_output"]
         if self.args.other_features:
-            emb = torch.cat((emb, data["other_features"].type(torch.float)), dim = -1)
+            emb = torch.cat((emb, data["other_features"].type(torch.float).to(self.args.device)), dim = -1)
         logits = self.head(emb)
         return logits
 
